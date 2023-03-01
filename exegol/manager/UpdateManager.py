@@ -1,10 +1,12 @@
 import os
 import re
+import curses
 from datetime import datetime, timedelta, date
 from typing import Optional, Dict, cast, Tuple, Sequence
 
 from rich.prompt import Prompt
 
+from exegol.utils.CustomImage import CustomImage
 from exegol.console.ExegolPrompt import Confirm
 from exegol.console.TUI import ExegolTUI
 from exegol.console.cli.ParametersManager import ParametersManager
@@ -330,6 +332,12 @@ class UpdateManager:
                                                                                              subject="a build profile",
                                                                                              title="[not italic]:dog: [/not italic][gold3]Profile[/gold3]"))
         logger.debug(f"Using {build_profile} build profile ({build_dockerfile})")
+
+        # Check if it's a custom profile
+        if build_profile == "custom":
+            curses.wrapper(CustomImage().get_selection)
+            exit(0)
+
         # Docker Build
         DockerUtils.buildImage(build_name, build_profile, build_dockerfile)
         return build_name
@@ -345,7 +353,7 @@ class UpdateManager:
         """List every build profiles available locally
         Return a dict of options {"key = profile name": "value = dockerfile full name"}"""
         # Default stable profile
-        profiles = {"full": "Dockerfile"}
+        profiles = {"full": "Dockerfile", "custom": ""}
         # List file *.dockerfile is the build context directory
         logger.debug(f"Loading build profile from {ConstantConfig.build_context_path}")
         docker_files = list(ConstantConfig.build_context_path_obj.glob("*.dockerfile"))
